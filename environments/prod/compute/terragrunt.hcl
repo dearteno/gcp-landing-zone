@@ -1,16 +1,34 @@
-include "terragrunt.hcl"
+include "root" {
+  path = find_in_parent_folders()
+}
+
+include "env" {
+  path = "${get_terragrunt_dir()}/../terragrunt.hcl"
+}
+
+terraform {
+  source = "../../../modules/compute"
+}
 
 dependency "networking" {
   config_path = "../networking"
-}
-
-dependency "security" {
-  config_path = "../security"
+  mock_outputs = {
+    network_name = "prod-vpc"
+    subnet_name  = "prod-subnet"
+    pods_cidr    = "10.5.0.0/16"
+    services_cidr = "10.6.0.0/16"
+  }
 }
 
 inputs = {
-  region = "us-central1"
-  project_id = "your-prod-project-id"
-  instance_type = "n1-standard-1"
-  # Add other inputs as necessary
+  cluster_name    = "prod-gke-cluster"
+  network_name    = dependency.networking.outputs.network_name
+  subnet_name     = dependency.networking.outputs.subnet_name
+  pods_cidr       = dependency.networking.outputs.pods_cidr
+  services_cidr   = dependency.networking.outputs.services_cidr
+  machine_type    = "e2-standard-8"
+  min_node_count  = 2
+  max_node_count  = 10
+  initial_node_count = 3
+  node_pool_name  = "prod-node-pool"
 }

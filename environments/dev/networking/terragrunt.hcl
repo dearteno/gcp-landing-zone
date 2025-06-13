@@ -1,12 +1,21 @@
-include "terragrunt.hcl"
+include "root" {
+  path = find_in_parent_folders()
+}
 
-dependency "common" {
-  config_path = "../../common"
+include "env" {
+  path = "${get_terragrunt_dir()}/../terragrunt.hcl"
+}
+
+terraform {
+  source = "../../../modules/networking"
 }
 
 inputs = {
-  region = "us-central1"
-  network_name = "dev-network"
-  subnet_name = "dev-subnet"
-  cidr_block = "10.0.0.0/24"
+  network_name = "dev-vpc"
+  subnet_name  = "dev-subnet"
+  subnet_cidr  = "10.0.1.0/24"
+  pods_cidr    = "10.1.0.0/16"
+  services_cidr = "10.2.0.0/16"
+  nat_name     = "dev-nat-gateway"
+  router_name  = "dev-cloud-router"
 }

@@ -20,19 +20,11 @@ dependency "networking" {
   }
 }
 
-dependency "compute" {
-  config_path = "../compute"
-  mock_outputs = {
-    cluster_name = "dev-gke-cluster"
-  }
-}
-
 inputs = {
   project_id         = local.project_id
   region             = local.region
   environment        = local.environment
   network_name       = dependency.networking.outputs.network_name
-  gke_cluster_name   = dependency.compute.outputs.cluster_name
   
   # Security settings for dev environment
   enable_org_policies         = false # Relaxed for dev

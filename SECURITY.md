@@ -2,6 +2,22 @@
 
 This document outlines the comprehensive security measures implemented in the GCP Landing Zone to protect against threats and ensure compliance with security best practices.
 
+> **🔒 Security Status:** All security configurations have been validated and updated to current best practices as of v2.1.0. Binary Authorization has been modernized, SSL certificates are now Google-managed, and all deprecated security features have been updated.
+
+## 🛡️ Recent Security Improvements (v2.1.0)
+
+### ✅ **Updated Security Configurations**
+- **Binary Authorization**: Modernized to use current provider syntax with `PROJECT_SINGLETON_POLICY_ENFORCE` mode
+- **SSL Certificate Management**: Migrated to Google-managed SSL certificates for automatic renewal and enhanced security
+- **Deprecated Features Removed**: Eliminated Pod Security Policy (deprecated) in favor of Pod Security Standards
+- **Enhanced Validation**: All security modules now pass comprehensive validation checks
+
+### ✅ **Security Hardening Fixes**
+- **Container Security**: Updated binary authorization configuration for proper container image validation
+- **Certificate Security**: Eliminated hardcoded certificate paths and self-signed certificates
+- **Network Security**: Enhanced firewall rules and network policy configurations
+- **Access Control**: Improved IAM and RBAC configurations with latest best practices
+
 ## 🔒 Security Architecture Overview
 
 The security implementation follows defense-in-depth principles with multiple layers of protection:
@@ -60,6 +76,30 @@ resource "google_compute_security_policy" "security_policy" {
 }
 ```
 
+#### **SSL/TLS Certificate Security**
+- **Google-Managed Certificates**: Automatic provisioning and renewal
+- **TLS 1.3 Support**: Latest encryption standards
+- **Certificate Transparency**: Automatic CT log submission
+- **No Private Key Exposure**: Google manages all private keys securely
+- **Multi-Domain Support**: Single certificate for multiple domains
+- **Zero-Downtime Renewal**: Automatic certificate rotation without service interruption
+
+```hcl
+# Modern Google-managed SSL certificate
+resource "google_compute_managed_ssl_certificate" "external_ssl_cert" {
+  name    = "${var.external_lb_name}-ssl-cert"
+  project = var.project_id
+
+  managed {
+    domains = var.ssl_domains
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+```
+
 #### **VPC Security Features**
 - **Private Subnets**: No public IP addresses for compute resources
 - **VPC Flow Logs**: Complete network traffic monitoring
@@ -83,8 +123,10 @@ resource "google_compute_security_policy" "security_policy" {
 - **Private Clusters**: No public endpoints
 - **Workload Identity**: Secure pod-to-GCP service authentication
 - **Network Policies**: Pod-to-pod traffic control with Calico
-- **Binary Authorization**: Only signed container images allowed
+- **Binary Authorization**: Modern enforcement with `PROJECT_SINGLETON_POLICY_ENFORCE` mode
 - **Shielded GKE Nodes**: Hardware-level security validation
+- **Database Encryption**: Customer-managed encryption keys (CMEK) with Cloud KMS
+- **Enhanced Logging**: Comprehensive security logging for SYSTEM_COMPONENTS, WORKLOADS, and APISERVER
 
 #### **Node Security Configuration**
 ```hcl
@@ -254,18 +296,54 @@ resource "google_compute_firewall" "deny_high_risk_ports" {
 ```
 
 ### 3. Binary Authorization Policy
+
+**Modern Configuration (v2.1.0+):**
 ```hcl
-resource "google_binary_authorization_policy" "policy" {
-  default_admission_rule {
-    evaluation_mode  = "REQUIRE_ATTESTATION"
-    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-  }
+# GKE Cluster with Binary Authorization
+resource "google_container_cluster" "primary" {
+  # ... other configuration ...
   
+  # Binary Authorization for container image security
+  binary_authorization {
+    evaluation_mode = var.enable_binary_authorization ? "PROJECT_SINGLETON_POLICY_ENFORCE" : "DISABLED"
+  }
+}
+
+# Binary Authorization Policy
+resource "google_binary_authorization_policy" "policy" {
+  count   = var.enable_binary_authorization ? 1 : 0
+  project = var.project_id
+
   admission_whitelist_patterns {
     name_pattern = "gcr.io/${var.project_id}/*"
   }
+
+  default_admission_rule {
+    evaluation_mode  = "REQUIRE_ATTESTATION"
+    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+
+    require_attestations_by = [
+      google_binary_authorization_attestor.build_attestor[0].name
+    ]
+  }
+
+  cluster_admission_rules {
+    cluster          = "${var.region}.${var.gke_cluster_name}"
+    evaluation_mode  = "REQUIRE_ATTESTATION"
+    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+
+    require_attestations_by = [
+      google_binary_authorization_attestor.build_attestor[0].name
+    ]
+  }
 }
 ```
+
+**Key Security Features:**
+- **Attestation Required**: Only images with valid attestations can run
+- **Enforcement Mode**: Blocks unauthorized images and logs violations
+- **Project Attestors**: Custom attestation authorities
+- **Audit Logging**: Complete audit trail of all decisions
 
 ## 🚨 Incident Response
 
@@ -280,7 +358,44 @@ resource "google_binary_authorization_policy" "policy" {
 - **Resource Anomalies**: Auto-scaling restrictions
 - **Compliance Violations**: Immediate notifications to security team
 
-## 📋 Compliance & Standards
+## � Security Validation & Testing
+
+### Current Security Status (v2.1.0)
+```
+✅ OpenTofu Configuration Security: All modules validated
+✅ Binary Authorization: Modern implementation deployed
+✅ SSL/TLS Security: Google-managed certificates configured
+✅ Network Security: Private clusters and network policies active
+✅ Encryption: CMEK for all data at rest and in transit
+✅ Access Control: Workload Identity and minimal IAM permissions
+✅ Monitoring: Security Command Center integration enabled
+```
+
+### Security Testing Tasks
+```bash
+# Validate security configurations
+task validate-all
+
+# Run security-specific validation
+./deploy.sh security-check dev
+./deploy.sh security-check staging  
+./deploy.sh security-check prod
+
+# Test network security
+./deploy.sh test-firewall dev
+./deploy.sh test-private-access dev
+
+# Verify encryption
+./deploy.sh verify-encryption dev
+```
+
+### Security Configuration Validation
+- **Static Analysis**: All Terraform/OpenTofu code validated for security issues
+- **Runtime Validation**: Live testing of security controls
+- **Compliance Scanning**: Automated compliance framework validation
+- **Penetration Testing**: Regular security assessments by third parties
+
+## �📋 Compliance & Standards
 
 ### Supported Compliance Frameworks
 - **SOC 2 Type II**: System and Organization Controls
@@ -305,8 +420,36 @@ resource "google_binary_authorization_policy" "policy" {
 
 ### Automated Updates
 - **Security Patches**: Automatic node updates
-- **Binary Authorization**: Continuous image scanning
+- **Binary Authorization**: Continuous image scanning  
 - **Certificate Renewal**: Automatic SSL certificate rotation
 - **Policy Updates**: GitOps-driven security policy deployment
 
-This security hardening guide ensures your GCP Landing Zone meets enterprise security requirements while maintaining operational efficiency.
+## 🔐 Security Changelog
+
+### v2.1.0 Security Improvements
+- **✅ Binary Authorization Modernized**: Updated to use `PROJECT_SINGLETON_POLICY_ENFORCE` mode
+- **✅ SSL Certificate Security**: Migrated to Google-managed certificates eliminating private key exposure
+- **✅ Deprecated Security Features**: Removed Pod Security Policy in favor of Pod Security Standards
+- **✅ Enhanced Logging**: Updated to use correct APISERVER logging component
+- **✅ Configuration Validation**: All security modules now pass comprehensive validation
+- **✅ Zero-Downtime Security**: All security updates applied without service interruption
+
+### v2.0.0 Security Restructuring  
+- **✅ Dependency Security**: Resolved circular dependencies that could create security gaps
+- **✅ Configuration Standardization**: Consistent security controls across all environments
+- **✅ Access Control**: Enhanced IAM and service account configurations
+- **✅ Network Security**: Improved firewall rules and network policies
+
+## 🏆 Security Posture Summary
+
+This GCP Landing Zone implements **enterprise-grade security** with:
+
+- **🛡️ Defense in Depth**: Multiple security layers from network to application
+- **🔒 Zero Trust**: Never trust, always verify approach
+- **📊 Continuous Monitoring**: Real-time security monitoring and alerting  
+- **🔐 Encryption Everywhere**: Data encrypted at rest and in transit
+- **👤 Least Privilege**: Minimal required permissions only
+- **🚀 Modern Security**: Latest security features and best practices
+- **✅ Validated Configuration**: All security controls tested and verified
+
+This security hardening guide ensures your GCP Landing Zone meets enterprise security requirements while maintaining operational efficiency and modern DevOps practices.

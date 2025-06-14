@@ -17,7 +17,7 @@ resource "google_container_cluster" "primary" {
     enable_private_nodes    = var.enable_private_nodes
     enable_private_endpoint = false
     master_ipv4_cidr_block  = var.master_ipv4_cidr_block
-    
+
     master_global_access_config {
       enabled = false # Restrict master access
     }
@@ -61,11 +61,6 @@ resource "google_container_cluster" "primary" {
     config_connector_config {
       enabled = var.enable_config_connector
     }
-    # Enable Istio for service mesh security
-    istio_config {
-      disabled = !var.enable_istio
-      auth     = var.enable_istio ? "AUTH_MUTUAL_TLS" : null
-    }
   }
 
   # Workload Identity for secure pod authentication
@@ -97,13 +92,12 @@ resource "google_container_cluster" "primary" {
         "https://www.googleapis.com/auth/cloud-platform"
       ]
       service_account = var.node_service_account_email
-      
+
       # Security hardening for auto-provisioned nodes
-      disk_size    = 50
-      disk_type    = "pd-ssd"
-      image_type   = "COS_CONTAINERD" # Container-Optimized OS
-      preemptible  = false
-      
+      disk_size  = 50
+      disk_type  = "pd-ssd"
+      image_type = "COS_CONTAINERD" # Container-Optimized OS
+
       shielded_instance_config {
         enable_secure_boot          = true
         enable_integrity_monitoring = true
@@ -112,18 +106,15 @@ resource "google_container_cluster" "primary" {
   }
 
   # Binary Authorization for container image security
-  enable_binary_authorization = var.enable_binary_authorization
-
-  # Pod Security Policy (deprecated but shown for reference)
-  pod_security_policy_config {
-    enabled = false # Replaced by Pod Security Standards
+  binary_authorization {
+    evaluation_mode = var.enable_binary_authorization ? "PROJECT_SINGLETON_POLICY_ENFORCE" : "DISABLED"
   }
 
   # Maintenance policy with security updates
   maintenance_policy {
     recurring_window {
       start_time = "2023-01-01T00:00:00Z"
-      end_time   = "2023-01-01T04:00:00Z" 
+      end_time   = "2023-01-01T04:00:00Z"
       recurrence = "FREQ=WEEKLY;BYDAY=SU" # Sunday maintenance window
     }
   }
@@ -147,7 +138,7 @@ resource "google_container_cluster" "primary" {
     enable_components = [
       "SYSTEM_COMPONENTS",
       "WORKLOADS",
-      "API_SERVER"
+      "APISERVER"
     ]
   }
 
@@ -156,7 +147,7 @@ resource "google_container_cluster" "primary" {
       "SYSTEM_COMPONENTS",
       "WORKLOADS",
       "APISERVER",
-      "SCHEDULER", 
+      "SCHEDULER",
       "CONTROLLER_MANAGER"
     ]
   }
@@ -175,10 +166,10 @@ resource "google_container_cluster" "primary" {
 
 # Enhanced Node Pool with Security Hardening
 resource "google_container_node_pool" "primary_nodes" {
-  name       = var.node_pool_name
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  project    = var.project_id
+  name     = var.node_pool_name
+  location = var.region
+  cluster  = google_container_cluster.primary.name
+  project  = var.project_id
 
   node_count = var.initial_node_count
 
@@ -193,7 +184,7 @@ resource "google_container_node_pool" "primary_nodes" {
     preemptible  = false
     machine_type = var.machine_type
     disk_size_gb = var.disk_size_gb
-    disk_type    = "pd-ssd" # Use SSD for better performance and security
+    disk_type    = "pd-ssd"         # Use SSD for better performance and security
     image_type   = "COS_CONTAINERD" # Container-Optimized OS with containerd
 
     # Use dedicated service account with minimal permissions
@@ -204,7 +195,7 @@ resource "google_container_node_pool" "primary_nodes" {
 
     labels = merge(var.labels, {
       "security-hardened" = "true"
-      "node-pool"        = var.node_pool_name
+      "node-pool"         = var.node_pool_name
     })
 
     tags = ["gke-node", "security-hardened", var.environment]
@@ -213,9 +204,9 @@ resource "google_container_node_pool" "primary_nodes" {
     metadata = {
       disable-legacy-endpoints = "true"
       # Disable SSH access for security
-      ssh-keys                = ""
+      ssh-keys = ""
       # Enable OS Login for centralized access control
-      enable-oslogin         = "true"
+      enable-oslogin = "true"
       # Block project-level SSH keys
       block-project-ssh-keys = "true"
     }
@@ -242,14 +233,14 @@ resource "google_container_node_pool" "primary_nodes" {
     # Linux node configuration for enhanced security
     linux_node_config {
       sysctls = {
-        "net.core.somaxconn"                = "1024"
-        "net.ipv4.ip_local_port_range"     = "1024 65535"
-        "net.ipv4.tcp_rmem"                = "4096 65536 16777216"
-        "net.ipv4.tcp_wmem"                = "4096 65536 16777216"
+        "net.core.somaxconn"           = "1024"
+        "net.ipv4.ip_local_port_range" = "1024 65535"
+        "net.ipv4.tcp_rmem"            = "4096 65536 16777216"
+        "net.ipv4.tcp_wmem"            = "4096 65536 16777216"
         # Security-focused sysctls
-        "net.ipv4.conf.all.log_martians"   = "1"
-        "net.ipv4.conf.default.log_martians" = "1"
-        "net.ipv4.conf.all.send_redirects"  = "0"
+        "net.ipv4.conf.all.log_martians"       = "1"
+        "net.ipv4.conf.default.log_martians"   = "1"
+        "net.ipv4.conf.all.send_redirects"     = "0"
         "net.ipv4.conf.default.send_redirects" = "0"
       }
     }
@@ -280,7 +271,7 @@ resource "google_container_node_pool" "primary_nodes" {
 
     # Resource allocation limits for security
     resource_labels = {
-      "environment"     = var.environment
+      "environment"    = var.environment
       "security-level" = "hardened"
       "compliance"     = "required"
     }
@@ -297,11 +288,11 @@ resource "google_container_node_pool" "primary_nodes" {
     max_surge       = 1
     max_unavailable = 0
     strategy        = "SURGE" # Ensure availability during security updates
-    
+
     blue_green_settings {
       standard_rollout_policy {
         batch_percentage    = 100
-        batch_node_count   = var.max_node_count
+        batch_node_count    = var.max_node_count
         batch_soak_duration = "300s"
       }
       node_pool_soak_duration = "300s"
@@ -312,18 +303,18 @@ resource "google_container_node_pool" "primary_nodes" {
   network_config {
     create_pod_range     = false
     enable_private_nodes = var.enable_private_nodes
-    
+
     pod_cidr_overprovision_config {
       disabled = false
     }
-    
+
     pod_ipv4_cidr_block = var.pods_cidr
   }
 
   # Placement policy for security and compliance
   placement_policy {
-    type         = "REGIONAL"
-    policy_name  = "security-placement-policy"
+    type        = "REGIONAL"
+    policy_name = "security-placement-policy"
   }
 
   # Node locations for high availability and compliance

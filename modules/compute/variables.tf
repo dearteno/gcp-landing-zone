@@ -168,3 +168,8 @@ variable "registry_certificate_secret" {
   type        = string
   default     = null
 }
+
+variable "environment" {
+  description = "The environment name (dev, staging, prod)"
+  type        = string
+}

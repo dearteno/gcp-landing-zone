@@ -3,9 +3,9 @@
 
 # Organization Policy Constraints
 resource "google_org_policy_policy" "disable_guest_attributes" {
-  count   = var.enable_org_policies ? 1 : 0
-  name    = "projects/${var.project_id}/policies/compute.disableGuestAttributesAccess"
-  parent  = "projects/${var.project_id}"
+  count  = var.enable_org_policies ? 1 : 0
+  name   = "projects/${var.project_id}/policies/compute.disableGuestAttributesAccess"
+  parent = "projects/${var.project_id}"
 
   spec {
     rules {
@@ -15,9 +15,9 @@ resource "google_org_policy_policy" "disable_guest_attributes" {
 }
 
 resource "google_org_policy_policy" "disable_serial_port_access" {
-  count   = var.enable_org_policies ? 1 : 0
-  name    = "projects/${var.project_id}/policies/compute.disableSerialPortAccess"
-  parent  = "projects/${var.project_id}"
+  count  = var.enable_org_policies ? 1 : 0
+  name   = "projects/${var.project_id}/policies/compute.disableSerialPortAccess"
+  parent = "projects/${var.project_id}"
 
   spec {
     rules {
@@ -27,9 +27,9 @@ resource "google_org_policy_policy" "disable_serial_port_access" {
 }
 
 resource "google_org_policy_policy" "require_ssl_certificates" {
-  count   = var.enable_org_policies ? 1 : 0
-  name    = "projects/${var.project_id}/policies/compute.requireSslCertificates"
-  parent  = "projects/${var.project_id}"
+  count  = var.enable_org_policies ? 1 : 0
+  name   = "projects/${var.project_id}/policies/compute.requireSslCertificates"
+  parent = "projects/${var.project_id}"
 
   spec {
     rules {
@@ -39,9 +39,9 @@ resource "google_org_policy_policy" "require_ssl_certificates" {
 }
 
 resource "google_org_policy_policy" "disable_nested_virtualization" {
-  count   = var.enable_org_policies ? 1 : 0
-  name    = "projects/${var.project_id}/policies/compute.disableNestedVirtualization"
-  parent  = "projects/${var.project_id}"
+  count  = var.enable_org_policies ? 1 : 0
+  name   = "projects/${var.project_id}/policies/compute.disableNestedVirtualization"
+  parent = "projects/${var.project_id}"
 
   spec {
     rules {
@@ -52,11 +52,11 @@ resource "google_org_policy_policy" "disable_nested_virtualization" {
 
 # Security Command Center Notifications
 resource "google_scc_notification_config" "security_notifications" {
-  count           = var.enable_scc_notifications ? 1 : 0
-  config_id       = "security-notifications"
-  organization    = var.organization_id
-  description     = "Security findings notifications"
-  pubsub_topic    = google_pubsub_topic.security_alerts[0].id
+  count        = var.enable_scc_notifications ? 1 : 0
+  config_id    = "security-notifications"
+  organization = var.organization_id
+  description  = "Security findings notifications"
+  pubsub_topic = google_pubsub_topic.security_alerts[0].id
   streaming_config {
     filter = var.scc_notification_filter
   }
@@ -169,10 +169,10 @@ resource "google_compute_security_policy" "security_policy" {
       }
     }
     rate_limit_options {
-      conform_action      = "allow"
-      exceed_action      = "deny(429)"
-      enforce_on_key     = "IP"
-      ban_duration_sec   = 600
+      conform_action   = "allow"
+      exceed_action    = "deny(429)"
+      enforce_on_key   = "IP"
+      ban_duration_sec = 600
       rate_limit_threshold {
         count        = 100
         interval_sec = 60
@@ -217,17 +217,17 @@ resource "google_binary_authorization_policy" "policy" {
   default_admission_rule {
     evaluation_mode  = "REQUIRE_ATTESTATION"
     enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    
+
     require_attestations_by = [
       google_binary_authorization_attestor.build_attestor[0].name
     ]
   }
 
   cluster_admission_rules {
-    cluster                 = "${var.region}.${var.gke_cluster_name}"
-    evaluation_mode        = "REQUIRE_ATTESTATION"
-    enforcement_mode       = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    
+    cluster          = "${var.region}.${var.gke_cluster_name}"
+    evaluation_mode  = "REQUIRE_ATTESTATION"
+    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+
     require_attestations_by = [
       google_binary_authorization_attestor.build_attestor[0].name
     ]
@@ -261,7 +261,7 @@ resource "google_logging_project_sink" "security_sink" {
   name        = "${var.environment}-security-logs"
   project     = var.project_id
   destination = "storage.googleapis.com/${google_storage_bucket.security_logs.name}"
-  
+
   filter = var.security_log_filter
 
   unique_writer_identity = true
@@ -326,7 +326,7 @@ resource "google_compute_firewall" "deny_all_ingress" {
   direction     = "INGRESS"
   priority      = 65534
   source_ranges = ["0.0.0.0/0"]
-  
+
   # This rule should be the lowest priority catch-all
   description = "Deny all ingress traffic - security hardening"
 }
@@ -341,9 +341,9 @@ resource "google_compute_firewall" "deny_all_egress" {
   }
 
   direction          = "EGRESS"
-  priority          = 65534
+  priority           = 65534
   destination_ranges = ["0.0.0.0/0"]
-  
+
   description = "Deny all egress traffic - security hardening"
 }
 
@@ -358,13 +358,13 @@ resource "google_compute_firewall" "allow_health_checks" {
     ports    = var.health_check_ports
   }
 
-  direction     = "INGRESS"
-  priority      = 1000
+  direction = "INGRESS"
+  priority  = 1000
   source_ranges = [
-    "130.211.0.0/22",  # Google Cloud Load Balancer health check ranges
-    "35.191.0.0/16"    # Google Cloud Load Balancer health check ranges
+    "130.211.0.0/22", # Google Cloud Load Balancer health check ranges
+    "35.191.0.0/16"   # Google Cloud Load Balancer health check ranges
   ]
   target_tags = ["health-check-target"]
-  
+
   description = "Allow Google Cloud health checks"
 }

@@ -1,0 +1,178 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: GCP Landing Zone - Terragrunt with OpenTofu
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  help:
+    desc: Show detailed help message
+    cmds:
+      - echo "{{.PROJECT_NAME}} Management"
+      - echo ""
+      - echo "Available tasks:"
+      - echo "  validate          Validate all OpenTofu configurations"
+      - echo "  validate-terragrunt Validate Terragrunt configurations for all environments"
+      - echo "  format            Format all OpenTofu files"
+      - echo ""
+      - echo "Development Environment:"
+      - echo "  plan-dev          Plan dev environment infrastructure"
+      - echo "  apply-dev         Apply dev environment infrastructure"
+      - echo "  destroy-dev       Destroy dev environment infrastructure"
+      - echo ""
+      - echo "Staging Environment:"
+      - echo "  plan-staging      Plan staging environment infrastructure"
+      - echo "  apply-staging     Apply staging environment infrastructure"
+      - echo "  destroy-staging   Destroy staging environment infrastructure"
+      - echo ""
+      - echo "Production Environment:"
+      - echo "  plan-prod         Plan production environment infrastructure"
+      - echo "  apply-prod        Apply production environment infrastructure"
+      - echo "  destroy-prod      Destroy production environment infrastructure"
+      - echo ""
+      - echo "Batch Operations:"
+      - echo "  plan-all          Plan all environments"
+      - echo "  validate-all      Validate all environments"
+
+  # Development environment
+  plan-dev:
+    desc: Plan dev environment infrastructure
+    cmds:
+      - echo "Planning dev environment..."
+      - ./deploy.sh dev plan
+
+  apply-dev:
+    desc: Apply dev environment infrastructure
+    cmds:
+      - echo "Applying dev environment..."
+      - ./deploy.sh dev apply
+
+  destroy-dev:
+    desc: Destroy dev environment infrastructure
+    prompt: Are you sure you want to destroy the dev environment?
+    cmds:
+      - echo "Destroying dev environment..."
+      - ./deploy.sh dev destroy
+
+  # Staging environment
+  plan-staging:
+    desc: Plan staging environment infrastructure
+    cmds:
+      - echo "Planning staging environment..."
+      - ./deploy.sh staging plan
+
+  apply-staging:
+    desc: Apply staging environment infrastructure
+    cmds:
+      - echo "Applying staging environment..."
+      - ./deploy.sh staging apply
+
+  destroy-staging:
+    desc: Destroy staging environment infrastructure
+    prompt: Are you sure you want to destroy the staging environment?
+    cmds:
+      - echo "Destroying staging environment..."
+      - ./deploy.sh staging destroy
+
+  # Production environment
+  plan-prod:
+    desc: Plan production environment infrastructure
+    cmds:
+      - echo "Planning production environment..."
+      - ./deploy.sh prod plan
+
+  apply-prod:
+    desc: Apply production environment infrastructure
+    prompt: Are you sure you want to apply to PRODUCTION?
+    cmds:
+      - echo "Applying production environment..."
+      - ./deploy.sh prod apply
+
+  destroy-prod:
+    desc: Destroy production environment infrastructure
+    prompt: Type 'DELETE_PRODUCTION' to confirm production destruction
+    cmds:
+      - echo "This is a PRODUCTION environment!"
+      - echo "Destroying production environment..."
+      - ./deploy.sh prod destroy
+
+  # Utility tasks
+  validate:
+    desc: Validate all OpenTofu configurations
+    cmds:
+      - echo "Validating OpenTofu configurations..."
+      - |
+        find . -name "*.tf" -type f -exec dirname {} \; | sort -u | while read dir; do
+          echo "Validating $dir..."
+          (cd "$dir" && tofu init -backend=false > /dev/null && tofu validate) || exit 1
+        done
+      - echo "All configurations are valid!"
+
+  validate-terragrunt:
+    desc: Validate Terragrunt configurations for all environments
+    cmds:
+      - echo "Validating Terragrunt configurations..."
+      - ./deploy.sh validate dev
+      - ./deploy.sh validate staging
+      - ./deploy.sh validate prod
+      - echo "All Terragrunt configurations are valid!"
+
+  format:
+    desc: Format all OpenTofu files
+    cmds:
+      - echo "Formatting OpenTofu files..."
+      - tofu fmt -recursive .
+      - echo "Formatting complete!"
+
+  # Batch operations
+  plan-all:
+    desc: Plan all environments
+    cmds:
+      - task: plan-dev
+      - task: plan-staging
+      - task: plan-prod
+
+  validate-all:
+    desc: Validate all configurations
+    cmds:
+      - task: validate
+      - task: validate-terragrunt
+
+  # Development helpers
+  clean:
+    desc: Clean temporary files and caches
+    cmds:
+      - echo "Cleaning temporary files..."
+      - find . -name ".terraform" -type d -exec rm -rf {} + 2>/dev/null || true
+      - find . -name ".terragrunt-cache" -type d -exec rm -rf {} + 2>/dev/null || true
+      - find . -name "*.tfplan" -type f -delete 2>/dev/null || true
+      - echo "Clean complete!"
+
+  init-dev:
+    desc: Initialize dev environment
+    cmds:
+      - echo "Initializing dev environment..."
+      - ./deploy.sh dev init
+
+  init-staging:
+    desc: Initialize staging environment
+    cmds:
+      - echo "Initializing staging environment..."
+      - ./deploy.sh staging init
+
+  init-prod:
+    desc: Initialize production environment
+    cmds:
+      - echo "Initializing production environment..."
+      - ./deploy.sh prod init
+
+  init-all:
+    desc: Initialize all environments
+    cmds:
+      - task: init-dev
+      - task: init-staging
+      - task: init-prod

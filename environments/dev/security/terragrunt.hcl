@@ -1,13 +1,16 @@
 include "root" {
-  path = find_in_parent_folders()
-}
-
-include "env" {
-  path = "${get_terragrunt_dir()}/../terragrunt.hcl"
+  path = find_in_parent_folders("root.hcl")
 }
 
 terraform {
   source = "../../../modules/security"
+}
+
+locals {
+  environment = "dev"
+  project_id = "your-project-id"
+  region     = "us-central1"
+  zone       = "us-central1-a"
 }
 
 dependency "networking" {
@@ -25,7 +28,9 @@ dependency "compute" {
 }
 
 inputs = {
-  environment         = "dev"
+  project_id         = local.project_id
+  region             = local.region
+  environment        = local.environment
   network_name       = dependency.networking.outputs.network_name
   gke_cluster_name   = dependency.compute.outputs.cluster_name
   

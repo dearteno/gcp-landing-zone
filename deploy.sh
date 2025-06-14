@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# GCP Landing Zone Deployment Script
-# This script deploys the complete GCP infrastructure using Terragrunt
+# GCP Landing Zone Deployment Script (OpenTofu + Terragrunt)
+# This script deploys the complete GCP infrastructure using Terragrunt with OpenTofu
 
 set -e
 
@@ -55,9 +55,11 @@ if ! command -v terragrunt &> /dev/null; then
     exit 1
 fi
 
-# Check if terraform is installed
-if ! command -v terraform &> /dev/null; then
-    print_error "Terraform is not installed. Please install it first."
+# Check if OpenTofu is installed
+if ! command -v tofu &> /dev/null; then
+    print_error "OpenTofu is not installed. Please install it first."
+    print_error "Install OpenTofu: https://opentofu.org/docs/intro/install/"
+    print_error "Or run: ./migrate-to-opentofu.sh"
     exit 1
 fi
 

@@ -1,6 +1,17 @@
-# GCP Landing Zone with Terragrunt
+# GCP Landing Zone with Terragrunt and OpenTofu
 
-This project provides a comprehensive Google Cloud Platform (GCP) landing zone using Terragrunt for infrastructure as code. It deploys a complete enterprise-ready infrastructure including VPC networking, GKE clusters, load balancers, and Gateway API configurations across multiple environments.
+This project provides a comprehensive Google Cloud Platform (GCP) landing zone using Terragrunt and OpenTofu for infrastructure as code. It deploys a complete enterprise-ready infrastructure including VPC networking, GKE clusters, load balancers, and Gateway API configurations across multiple environments.
+
+## 🔓 Why OpenTofu?
+
+This project uses OpenTofu instead of Terraform for the following benefits:
+
+- **Open Source**: Truly open-source fork of Terraform, ensuring long-term sustainability
+- **Community Driven**: Governed by the Linux Foundation with transparent development
+- **License Freedom**: MPL 2.0 license without the restrictions of HashiCorp's BSL
+- **Compatibility**: Drop-in replacement for Terraform with full compatibility
+- **Innovation**: Faster feature development and community contributions
+- **Vendor Neutral**: No single vendor control over the project direction
 
 ## 🏗️ Infrastructure Components
 
@@ -59,8 +70,8 @@ gcp-landing-zone/
 
 1. **Install required tools:**
    ```bash
-   # Install Terraform
-   brew install terraform
+   # Install OpenTofu
+   brew install opentofu
    
    # Install Terragrunt
    brew install terragrunt
@@ -128,6 +139,21 @@ terragrunt apply
 cd ../load-balancer
 terragrunt apply
 ```
+
+### Quick Migration from Terraform
+
+If you're migrating from Terraform to OpenTofu, use the provided migration script:
+
+```bash
+# Run the migration helper script
+./migrate-to-opentofu.sh
+```
+
+This script will:
+- Install OpenTofu on your system
+- Verify Terragrunt installation
+- Check for existing Terraform state (fully compatible)
+- Provide next steps for migration
 
 ## 🔧 Configuration
 
@@ -205,6 +231,27 @@ To customize the infrastructure:
    ```bash
    gcloud services enable container.googleapis.com
    gcloud services enable compute.googleapis.com
+   ```
+
+4. **OpenTofu installation issues:**
+   ```bash
+   # Install OpenTofu on macOS
+   brew install opentofu
+   
+   # Install OpenTofu on Linux
+   curl -fsSL https://get.opentofu.org/install-opentofu.sh | sh
+   
+   # Verify installation
+   tofu version
+   ```
+
+5. **Terragrunt binary configuration:**
+   ```bash
+   # Ensure Terragrunt uses OpenTofu
+   export TERRAGRUNT_TFPATH=tofu
+   
+   # Or set in terragrunt.hcl
+   terraform_binary = "tofu"
    ```
 
 ## 🤝 Contributing

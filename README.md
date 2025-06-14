@@ -180,12 +180,19 @@ To customize the infrastructure:
 
 ## 🔐 Security Features
 
-- **Private GKE clusters** with private nodes
-- **Workload Identity** for secure pod-to-GCP service communication
-- **Network policies** enabled
-- **Minimal IAM permissions** for service accounts
-- **Firewall rules** restricting traffic
-- **Private Google Access** enabled for subnets
+This landing zone implements enterprise-grade security controls:
+
+- **Defense in Depth**: Multi-layer security architecture
+- **Cloud Armor WAF**: Protection against OWASP Top 10 vulnerabilities
+- **Private GKE Clusters**: No public endpoints, private nodes only
+- **Binary Authorization**: Only signed container images allowed
+- **Workload Identity**: Secure pod-to-GCP service authentication
+- **Customer-Managed Encryption**: KMS keys for data protection
+- **VPC Flow Logs**: Complete network traffic monitoring
+- **Security Command Center**: Real-time threat detection
+- **Compliance Ready**: SOC 2, ISO 27001, PCI DSS alignment
+
+📖 **[Complete Security Guide](SECURITY.md)** - Detailed security architecture and controls
 
 ## 📊 Monitoring and Maintenance
 

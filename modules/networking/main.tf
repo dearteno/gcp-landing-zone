@@ -15,6 +15,13 @@ resource "google_compute_subnetwork" "subnetwork" {
 
   private_ip_google_access = var.enable_private_google_access
 
+  # Enable VPC Flow Logs for security monitoring
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 1.0
+    metadata            = "INCLUDE_ALL_METADATA"
+  }
+
   secondary_ip_range {
     range_name    = "pods"
     ip_cidr_range = var.pods_cidr
@@ -45,6 +52,19 @@ resource "google_compute_router" "router" {
   region  = var.region
   network = google_compute_network.vpc_network.id
   project = var.project_id
+
+  # Enable BGP for advanced routing
+  bgp {
+    asn            = 64512
+    advertise_mode = "CUSTOM"
+    
+    advertised_groups = ["ALL_SUBNETS"]
+    
+    advertised_ip_ranges {
+      range = var.subnet_cidr
+      description = "Primary subnet range"
+    }
+  }
 }
 
 # NAT Gateway
@@ -126,4 +146,78 @@ resource "google_compute_firewall" "allow_https" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["https-server"]
+}
+
+# Enhanced Security Features for Networking
+
+# Enhanced Firewall Rules with security hardening
+resource "google_compute_firewall" "allow_internal_secure" {
+  name    = "${var.network_name}-allow-internal-secure"
+  network = google_compute_network.vpc_network.name
+  project = var.project_id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22", "80", "443", "8080", "9090", "3000"] # Specific ports only
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["53", "123"] # DNS and NTP only
+  }
+
+  allow {
+    protocol = "icmp"
+  }
+
+  source_ranges = [var.subnet_cidr, var.pods_cidr, var.services_cidr]
+  target_tags   = ["internal-secure"]
+  
+  description = "Allow internal secure communication"
+}
+
+# Explicit deny for high-risk ports
+resource "google_compute_firewall" "deny_high_risk_ports" {
+  name    = "${var.network_name}-deny-high-risk-ports"
+  network = google_compute_network.vpc_network.name
+  project = var.project_id
+  priority = 500
+
+  deny {
+    protocol = "tcp"
+    ports    = [
+      "23",    # Telnet
+      "135",   # RPC
+      "139",   # NetBIOS
+      "445",   # SMB
+      "1433",  # SQL Server
+      "1521",  # Oracle
+      "3389",  # RDP
+      "5432",  # PostgreSQL
+      "5984",  # CouchDB
+      "6379",  # Redis
+      "9200",  # Elasticsearch
+      "27017", # MongoDB
+    ]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  description   = "Deny access to high-risk ports"
+}
+
+# GKE-specific firewall rules with security hardening
+resource "google_compute_firewall" "gke_webhooks" {
+  name    = "${var.network_name}-gke-webhooks"
+  network = google_compute_network.vpc_network.name
+  project = var.project_id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8443", "9443", "15017"] # Webhook and Istio ports
+  }
+
+  source_ranges = [var.subnet_cidr]
+  target_tags   = ["gke-cluster"]
+  
+  description = "Allow GKE webhooks and service mesh communication"
 }

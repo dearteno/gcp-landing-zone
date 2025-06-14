@@ -30,4 +30,30 @@ inputs = {
   # Load Balancer
   external_lb_name = "${local.environment}-external-lb"
   internal_lb_name = "${local.environment}-internal-lb"
+  
+  # Enhanced Security Configuration for Production
+  enable_binary_authorization = true
+  enable_shielded_nodes = true
+  enable_private_nodes = true
+  enable_istio = true # Service mesh for production
+  enable_config_connector = true
+  
+  # Restricted network access for production
+  authorized_networks = [
+    {
+      cidr_block   = "10.0.0.0/8"
+      display_name = "Internal corporate networks"
+    }
+  ]
+  
+  # Minimal allowed IP ranges for production
+  allowed_ip_ranges = [
+    "10.0.0.0/8",      # Internal networks only
+  ]
+  
+  # Extended log retention for compliance
+  log_retention_days = 2555 # 7 years for compliance
+  
+  # Strict health check ports
+  health_check_ports = ["80", "443"]
 }

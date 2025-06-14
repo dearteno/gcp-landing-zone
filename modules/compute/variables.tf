@@ -93,3 +93,78 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "database_encryption_key" {
+  description = "KMS key for database encryption"
+  type        = string
+  default     = null
+}
+
+variable "node_service_account_email" {
+  description = "Service account email for GKE nodes"
+  type        = string
+  default     = null
+}
+
+variable "enable_binary_authorization" {
+  description = "Enable Binary Authorization for the cluster"
+  type        = bool
+  default     = true
+}
+
+variable "enable_config_connector" {
+  description = "Enable Config Connector addon"
+  type        = bool
+  default     = false
+}
+
+variable "enable_istio" {
+  description = "Enable Istio service mesh"
+  type        = bool
+  default     = false
+}
+
+variable "enable_autopilot" {
+  description = "Enable GKE Autopilot mode"
+  type        = bool
+  default     = false
+}
+
+variable "authorized_networks" {
+  description = "List of authorized networks for API server access"
+  type = list(object({
+    cidr_block   = string
+    display_name = string
+  }))
+  default = null
+}
+
+variable "enable_shielded_nodes" {
+  description = "Enable Shielded GKE Nodes features"
+  type        = bool
+  default     = true
+}
+
+variable "enable_image_streaming" {
+  description = "Enable container image streaming"
+  type        = bool
+  default     = true
+}
+
+variable "security_group" {
+  description = "Security group for additional access control"
+  type        = string
+  default     = null
+}
+
+variable "node_locations" {
+  description = "List of zones for node placement"
+  type        = list(string)
+  default     = []
+}
+
+variable "registry_certificate_secret" {
+  description = "Secret Manager secret URI for registry certificates"
+  type        = string
+  default     = null
+}

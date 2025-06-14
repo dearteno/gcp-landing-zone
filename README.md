@@ -203,7 +203,60 @@ cd ../load-balancer
 terragrunt apply
 ```
 
-### 🔄 **Migration from Terraform**
+### � **Using Task (Recommended)**
+
+This project includes a `Taskfile.yml` for easier infrastructure management using [Task](https://taskfile.dev). Task provides a modern alternative to Make with better cross-platform support.
+
+#### **Available Tasks:**
+
+```bash
+# List all available tasks
+task --list
+
+# Show detailed help
+task help
+
+# Validation tasks
+task validate              # Validate OpenTofu configurations
+task validate-terragrunt   # Validate Terragrunt configurations
+task validate-all          # Run all validations
+
+# Environment-specific operations
+task plan-dev              # Plan dev environment
+task apply-dev             # Apply dev environment
+task destroy-dev           # Destroy dev environment
+
+task plan-staging          # Plan staging environment
+task apply-staging         # Apply staging environment
+task destroy-staging       # Destroy staging environment
+
+task plan-prod             # Plan production environment
+task apply-prod            # Apply production environment
+task destroy-prod          # Destroy production environment
+
+# Batch operations
+task plan-all              # Plan all environments
+task init-all              # Initialize all environments
+
+# Utility tasks
+task format                # Format all OpenTofu files
+task clean                 # Clean temporary files and caches
+```
+
+#### **Installation (if not already installed):**
+
+```bash
+# macOS
+brew install go-task/tap/go-task
+
+# Linux
+sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+
+# Windows
+choco install go-task
+```
+
+### �🔄 **Migration from Terraform**
 
 If you're migrating from Terraform to OpenTofu, use the provided migration script:
 

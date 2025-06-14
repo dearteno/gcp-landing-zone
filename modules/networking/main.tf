@@ -19,7 +19,7 @@ resource "google_compute_subnetwork" "subnetwork" {
   log_config {
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling        = 1.0
-    metadata            = "INCLUDE_ALL_METADATA"
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 
   secondary_ip_range {
@@ -57,11 +57,11 @@ resource "google_compute_router" "router" {
   bgp {
     asn            = 64512
     advertise_mode = "CUSTOM"
-    
+
     advertised_groups = ["ALL_SUBNETS"]
-    
+
     advertised_ip_ranges {
-      range = var.subnet_cidr
+      range       = var.subnet_cidr
       description = "Primary subnet range"
     }
   }
@@ -70,12 +70,12 @@ resource "google_compute_router" "router" {
 # NAT Gateway
 resource "google_compute_router_nat" "nat" {
   name                               = var.nat_name
-  router                            = google_compute_router.router.name
-  region                            = var.region
-  nat_ip_allocate_option            = "MANUAL_ONLY"
-  nat_ips                           = [google_compute_address.nat_external_ip.self_link]
+  router                             = google_compute_router.router.name
+  region                             = var.region
+  nat_ip_allocate_option             = "MANUAL_ONLY"
+  nat_ips                            = [google_compute_address.nat_external_ip.self_link]
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  project                           = var.project_id
+  project                            = var.project_id
 
   log_config {
     enable = true
@@ -172,20 +172,20 @@ resource "google_compute_firewall" "allow_internal_secure" {
 
   source_ranges = [var.subnet_cidr, var.pods_cidr, var.services_cidr]
   target_tags   = ["internal-secure"]
-  
+
   description = "Allow internal secure communication"
 }
 
 # Explicit deny for high-risk ports
 resource "google_compute_firewall" "deny_high_risk_ports" {
-  name    = "${var.network_name}-deny-high-risk-ports"
-  network = google_compute_network.vpc_network.name
-  project = var.project_id
+  name     = "${var.network_name}-deny-high-risk-ports"
+  network  = google_compute_network.vpc_network.name
+  project  = var.project_id
   priority = 500
 
   deny {
     protocol = "tcp"
-    ports    = [
+    ports = [
       "23",    # Telnet
       "135",   # RPC
       "139",   # NetBIOS
@@ -218,6 +218,6 @@ resource "google_compute_firewall" "gke_webhooks" {
 
   source_ranges = [var.subnet_cidr]
   target_tags   = ["gke-cluster"]
-  
+
   description = "Allow GKE webhooks and service mesh communication"
 }

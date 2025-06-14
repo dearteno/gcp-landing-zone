@@ -79,6 +79,13 @@ gcp-landing-zone/
 │   ├── networking/                  # VPC, subnets, NAT, firewall, flow logs
 │   ├── compute/                     # GKE cluster, nodes, security configs
 │   └── load-balancer/               # LBs, Cloud Armor, Gateway API, SSL certs
+├── docs/                            # Comprehensive documentation
+│   ├── API_REFERENCE.md             # Complete module API documentation
+│   ├── TROUBLESHOOTING.md           # Troubleshooting guide and solutions
+│   ├── MIGRATION_GUIDE.md           # Migration from existing infrastructure
+│   ├── PERFORMANCE_TUNING.md        # Performance optimization guide
+│   └── examples/                    # Real-world deployment examples
+│       └── BASIC_DEPLOYMENT.md      # Step-by-step deployment scenarios
 ├── logs/                            # Deployment logs and audit trails
 ├── deploy.sh                        # Enhanced deployment automation script
 ├── migrate-to-opentofu.sh          # Migration helper script
@@ -90,6 +97,7 @@ gcp-landing-zone/
 ├── SECURITY.md                      # Detailed security documentation
 ├── CHANGELOG.md                     # Version history and changes
 ├── FIX_SUMMARY.md                   # Summary of recent fixes and improvements
+├── copilot-instructions.md          # AI assistant guidance
 └── network-diagram.md               # Network architecture diagram
 ```
 
@@ -452,6 +460,16 @@ This landing zone implements comprehensive enterprise-grade security controls:
 
 🗺️ **[Network Security Diagram](network-diagram.md)** - Visual representation of security architecture
 
+📚 **[API Reference](docs/API_REFERENCE.md)** - Comprehensive module documentation and usage examples
+
+🔧 **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues, solutions, and debugging techniques
+
+🚀 **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Step-by-step migration from existing infrastructure
+
+⚡ **[Performance Tuning](docs/PERFORMANCE_TUNING.md)** - Optimization strategies and best practices
+
+💡 **[Deployment Examples](docs/examples/BASIC_DEPLOYMENT.md)** - Real-world deployment scenarios and configurations
+
 ## 📊 Monitoring and Maintenance
 
 ### 🔍 **Automated Monitoring**
@@ -716,6 +734,15 @@ We welcome contributions to improve this GCP landing zone implementation!
 - ✅ **Security Hardened** - Enterprise-grade security controls
 - ✅ **Well Documented** - Comprehensive guides and examples
 - ✅ **Actively Maintained** - Regular updates and improvements
+
+### 📚 **Complete Documentation**
+- **[Documentation Index](docs/README.md)** - Central hub for all documentation
+- **[Quick Reference](docs/QUICK_REFERENCE.md)** - Essential commands and configurations
+- **[API Reference](docs/API_REFERENCE.md)** - Complete module documentation
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Issue resolution and debugging
+- **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Step-by-step migration procedures
+- **[Performance Tuning](docs/PERFORMANCE_TUNING.md)** - Optimization strategies
+- **[Deployment Examples](docs/examples/BASIC_DEPLOYMENT.md)** - Real-world scenarios
 
 ### 📞 **Support & Community**
 - **Issues**: [GitHub Issues](https://github.com/your-org/gcp-landing-zone/issues)

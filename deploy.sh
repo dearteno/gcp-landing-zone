@@ -112,9 +112,11 @@ validate_prerequisites() {
     fi
     
     # Check gcloud authentication
-    if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | head -n1 > /dev/null; then
+    if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | head -n1 > /dev/null 2>&1; then
         print_error "No active gcloud authentication found."
-        print_error "Run: gcloud auth login"
+        print_error "Please run: gcloud auth login"
+        print_error "Or set up Application Default Credentials:"
+        print_error "  gcloud auth application-default login"
         exit 1
     fi
     

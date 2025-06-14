@@ -12,7 +12,6 @@ locals {
   region     = "us-central1"
   zone       = "us-central1-a"
 }
-}
 
 dependency "networking" {
   config_path = "../networking"
@@ -21,19 +20,11 @@ dependency "networking" {
   }
 }
 
-dependency "compute" {
-  config_path = "../compute"
-  mock_outputs = {
-    cluster_name = "prod-gke-cluster"
-  }
-}
-
 inputs = {
   project_id         = local.project_id
   region             = local.region
   environment        = local.environment
   network_name       = dependency.networking.outputs.network_name
-  gke_cluster_name   = dependency.compute.outputs.cluster_name
   
   # Strict security settings for production
   enable_org_policies         = true

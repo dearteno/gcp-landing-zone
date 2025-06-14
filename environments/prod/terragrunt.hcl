@@ -1,16 +1,25 @@
 include "root" {
-  path = find_in_parent_folders()
-}
-
-include "common" {
-  path = "${get_terragrunt_dir()}/../../common/terragrunt.hcl"
+  path = find_in_parent_folders("root.hcl")
 }
 
 locals {
   environment = "prod"
+  project_id = "your-project-id"
+  region     = "us-central1"
+  zone       = "us-central1-a"
+  
+  # Common tags for all resources
+  labels = {
+    environment = local.environment
+    managed_by  = "terragrunt"
+  }
 }
 
 inputs = {
+  project_id = local.project_id
+  region     = local.region
+  zone       = local.zone
+  labels     = local.labels
   environment = local.environment
   
   # Networking

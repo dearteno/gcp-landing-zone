@@ -1,16 +1,22 @@
 include "root" {
-  path = find_in_parent_folders()
-}
-
-include "env" {
-  path = "${get_terragrunt_dir()}/../terragrunt.hcl"
+  path = find_in_parent_folders("root.hcl")
 }
 
 terraform {
   source = "../../../modules/networking"
 }
 
+locals {
+  environment = "dev"
+  project_id = "your-project-id"
+  region     = "us-central1"
+  zone       = "us-central1-a"
+}
+
 inputs = {
+  project_id   = local.project_id
+  region       = local.region
+  environment  = local.environment
   network_name = "dev-vpc"
   subnet_name  = "dev-subnet"
   subnet_cidr  = "10.0.1.0/24"

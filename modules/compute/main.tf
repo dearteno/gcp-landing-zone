@@ -61,11 +61,6 @@ resource "google_container_cluster" "primary" {
     config_connector_config {
       enabled = var.enable_config_connector
     }
-    # Enable Istio for service mesh security
-    istio_config {
-      disabled = !var.enable_istio
-      auth     = var.enable_istio ? "AUTH_MUTUAL_TLS" : null
-    }
   }
 
   # Workload Identity for secure pod authentication
@@ -102,7 +97,6 @@ resource "google_container_cluster" "primary" {
       disk_size   = 50
       disk_type   = "pd-ssd"
       image_type  = "COS_CONTAINERD" # Container-Optimized OS
-      preemptible = false
 
       shielded_instance_config {
         enable_secure_boot          = true
@@ -112,11 +106,8 @@ resource "google_container_cluster" "primary" {
   }
 
   # Binary Authorization for container image security
-  enable_binary_authorization = var.enable_binary_authorization
-
-  # Pod Security Policy (deprecated but shown for reference)
-  pod_security_policy_config {
-    enabled = false # Replaced by Pod Security Standards
+  binary_authorization {
+    evaluation_mode = var.enable_binary_authorization ? "PROJECT_SINGLETON_POLICY_ENFORCE" : "DISABLED"
   }
 
   # Maintenance policy with security updates
@@ -147,7 +138,7 @@ resource "google_container_cluster" "primary" {
     enable_components = [
       "SYSTEM_COMPONENTS",
       "WORKLOADS",
-      "API_SERVER"
+      "APISERVER"
     ]
   }
 

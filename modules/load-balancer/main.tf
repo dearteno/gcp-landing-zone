@@ -51,16 +51,18 @@ resource "google_compute_url_map" "external_url_map" {
 resource "google_compute_target_https_proxy" "external_https_proxy" {
   name             = "${var.external_lb_name}-https-proxy"
   url_map          = google_compute_url_map.external_url_map.self_link
-  ssl_certificates = [google_compute_ssl_certificate.external_ssl_cert.self_link]
+  ssl_certificates = [google_compute_managed_ssl_certificate.external_ssl_cert.self_link]
   project          = var.project_id
 }
 
-# SSL Certificate for External Load Balancer
-resource "google_compute_ssl_certificate" "external_ssl_cert" {
-  name        = "${var.external_lb_name}-ssl-cert"
-  private_key = file("${path.module}/ssl/private.key")
-  certificate = file("${path.module}/ssl/certificate.crt")
-  project     = var.project_id
+# SSL Certificate for External Load Balancer (Google-managed)
+resource "google_compute_managed_ssl_certificate" "external_ssl_cert" {
+  name    = "${var.external_lb_name}-ssl-cert"
+  project = var.project_id
+
+  managed {
+    domains = var.ssl_domains
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -154,7 +156,7 @@ resource "google_compute_url_map" "gateway_api_external" {
 resource "google_compute_target_https_proxy" "gateway_api_external_proxy" {
   name             = "gateway-api-external-proxy"
   url_map          = google_compute_url_map.gateway_api_external.self_link
-  ssl_certificates = [google_compute_ssl_certificate.external_ssl_cert.self_link]
+  ssl_certificates = [google_compute_managed_ssl_certificate.external_ssl_cert.self_link]
   project          = var.project_id
 }
 

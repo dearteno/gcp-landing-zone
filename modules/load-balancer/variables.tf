@@ -52,3 +52,9 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "ssl_domains" {
+  description = "List of domains for SSL certificate"
+  type        = list(string)
+  default     = ["example.com"]
+}

@@ -34,8 +34,8 @@ output "security_logs_bucket" {
 }
 
 output "binary_authorization_policy" {
-  description = "Binary Authorization policy name"
-  value       = var.enable_binary_authorization ? google_binary_authorization_policy.policy[0].name : null
+  description = "Binary Authorization policy ID"
+  value       = var.enable_binary_authorization ? google_binary_authorization_policy.policy[0].id : null
 }
 
 output "security_notification_topic" {

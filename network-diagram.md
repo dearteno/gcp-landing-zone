@@ -1,4 +1,4 @@
-# GCP Landing Zone Network Architecture
+# GCP Landing Zone Network Architecture (OpenTofu + Terragrunt)
 
 ```mermaid
 graph TB

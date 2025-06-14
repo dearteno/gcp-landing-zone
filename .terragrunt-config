@@ -1,0 +1,24 @@
+# Terragrunt Configuration for OpenTofu
+# This file configures Terragrunt to use OpenTofu instead of Terraform
+
+# Configure Terragrunt to use OpenTofu binary
+terraform_binary = "tofu"
+
+# Configure Terragrunt version constraints
+terraform_version_constraint = ">= 1.6.0"
+terragrunt_version_constraint = ">= 0.50.0"
+
+# Enable enhanced logging for debugging
+log_level = "info"
+
+# Configure retry settings
+retryable_errors = [
+  "(?s).*Error.*timeout.*",
+  "(?s).*Error.*connection.*reset.*",
+  "(?s).*Error.*connection.*refused.*",
+  "(?s).*Error.*deadline.*exceeded.*",
+  "(?s).*Error.*503.*Service.*Unavailable.*",
+]
+
+retry_max_attempts = 3
+retry_sleep_interval_sec = 5

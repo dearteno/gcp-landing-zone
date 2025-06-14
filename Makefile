@@ -2,12 +2,12 @@
 
 # Default target
 help:
-	@echo "GCP Landing Zone - Terragrunt Management"
+	@echo "GCP Landing Zone - Terragrunt with OpenTofu Management"
 	@echo ""
 	@echo "Available targets:"
 	@echo "  help              Show this help message"
-	@echo "  validate          Validate all Terraform configurations"
-	@echo "  format            Format all Terraform files"
+	@echo "  validate          Validate all OpenTofu configurations"
+	@echo "  format            Format all OpenTofu files"
 	@echo ""
 	@echo "Development Environment:"
 	@echo "  plan-dev          Plan dev environment infrastructure"
@@ -70,14 +70,14 @@ destroy-prod:
 
 # Utility targets
 validate:
-	@echo "Validating Terraform configurations..."
+	@echo "Validating OpenTofu configurations..."
 	@find . -name "*.tf" -type f -exec dirname {} \; | sort -u | while read dir; do \
 		echo "Validating $$dir..."; \
-		(cd "$$dir" && terraform init -backend=false > /dev/null && terraform validate) || exit 1; \
+		(cd "$$dir" && tofu init -backend=false > /dev/null && tofu validate) || exit 1; \
 	done
 	@echo "All configurations are valid!"
 
 format:
-	@echo "Formatting Terraform files..."
-	terraform fmt -recursive .
+	@echo "Formatting OpenTofu files..."
+	tofu fmt -recursive .
 	@echo "Formatting complete!"

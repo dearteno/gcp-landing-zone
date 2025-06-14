@@ -2,6 +2,13 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+
+locals {
+  environment = "prod"
+  project_id = "your-project-id"
+  region     = "us-central1"
+  zone       = "us-central1-a"
+}
 terraform {
   source = "../../../modules/compute"
 }
@@ -17,6 +24,9 @@ dependency "networking" {
 }
 
 inputs = {
+  project_id  = local.project_id
+  region      = local.region
+  environment = local.environment
   cluster_name    = "prod-gke-cluster"
   network_name    = dependency.networking.outputs.network_name
   subnet_name     = dependency.networking.outputs.subnet_name

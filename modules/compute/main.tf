@@ -94,9 +94,9 @@ resource "google_container_cluster" "primary" {
       service_account = var.node_service_account_email
 
       # Security hardening for auto-provisioned nodes
-      disk_size   = 50
-      disk_type   = "pd-ssd"
-      image_type  = "COS_CONTAINERD" # Container-Optimized OS
+      disk_size  = 50
+      disk_type  = "pd-ssd"
+      image_type = "COS_CONTAINERD" # Container-Optimized OS
 
       shielded_instance_config {
         enable_secure_boot          = true
